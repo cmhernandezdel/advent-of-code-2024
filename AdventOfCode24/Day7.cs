@@ -6,7 +6,7 @@ public static class Day7
 {
     private readonly record struct Operation(long Result, long[] Operands);
 
-    private readonly record struct Node(long Value, int Depth, string StringRepresentation);
+    private readonly record struct Node(long Value, int Depth);
 
     private static Operation[] Parse(string filename)
     {
@@ -28,12 +28,12 @@ public static class Day7
     }
 
     // Part one
-    // We implement a breadth-first search pruning all the branches that give a result
-    // higher than our target. If we wanted a depth-first search we would use a stack instead of a queue.
+    // We implement a depth-first search pruning all the branches that give a result
+    // higher than our target. If we wanted a breadth-first search we would use a queue instead of a stack.
     private static bool Test(Operation op)
     {
         Stack<Node> nextToVisit = [];
-        nextToVisit.Push(new Node(op.Operands[0], 0, $"{op.Operands[0]}"));
+        nextToVisit.Push(new Node(op.Operands[0], 0));
 
         while (nextToVisit.Count != 0)
         {
@@ -50,11 +50,11 @@ public static class Day7
                 continue; // we reached the end of the search tree
             }
             
-            nextToVisit.Push(new Node(current.Value + op.Operands[current.Depth + 1], current.Depth + 1, $"{current.StringRepresentation} + {op.Operands[current.Depth + 1]}"));
-            nextToVisit.Push(new Node(current.Value * op.Operands[current.Depth + 1], current.Depth + 1, $"{current.StringRepresentation} * {op.Operands[current.Depth + 1]}"));
+            nextToVisit.Push(new Node(current.Value + op.Operands[current.Depth + 1], current.Depth + 1));
+            nextToVisit.Push(new Node(current.Value * op.Operands[current.Depth + 1], current.Depth + 1));
             
             // Part two: add "concat" operator
-            nextToVisit.Push(new Node(Convert.ToInt64($"{current.Value}{op.Operands[current.Depth + 1]}"), current.Depth + 1, $"{current.StringRepresentation} || {op.Operands[current.Depth + 1]}"));
+            nextToVisit.Push(new Node(Convert.ToInt64($"{current.Value}{op.Operands[current.Depth + 1]}"), current.Depth + 1));
         }
 
         return false;
