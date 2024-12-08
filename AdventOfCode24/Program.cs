@@ -7,4 +7,6 @@
 // Day5 d5 = new Day5();
 // d5.Solve("orders.txt", "pages.txt");
 //Day6.Solve("input.txt");
-Day7.Solve("input.txt");
+//Day7.Solve("input.txt");
+Day8 d8 = new Day8();
+d8.Solve("input.txt");
