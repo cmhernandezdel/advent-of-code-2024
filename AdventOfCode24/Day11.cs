@@ -9,58 +9,78 @@ public class Day11
     // and of course I had read the Reddit, but seems like caching the results this way
     // turns into memory issues really fast.
     
-    // Then I tried to cache only the multiplications, but I got into memory issues as well.
-    // Ideas: manually managed memory, parallelization
-    private readonly Dictionary<string, string> _mapping = new Dictionary<string, string>
-    {
-        { "0", "1" },
-        { "1", "2024" }
-    };
+    // Then I tried to cache only the multiplications, but I got into memory issues as well, only a little bit later.
+    
+    // Reading a little bit more, turns out that I don't really need the list because the order is irrelevant,
+    // so I just need a dictionary and the number of times that each stone appears.
 
-    private string Blink(string input)
-    {
-        List<string> newInput = [];
-        string[] s = input.Split(" ");
-        foreach (var x in s)
-        {
-            bool success = _mapping.TryGetValue(x, out string? v);
-            if (success)
-            {
-                newInput.Add(v!);
-            }
-            else
-            {
-                if (x.Length % 2 == 0)
-                {
-                    string[] values = new string[2];
-                    values[0] = Convert.ToInt64(x.Substring(0, x.Length / 2)).ToString();
-                    values[1] = Convert.ToInt64(x.Substring(x.Length / 2)).ToString();
-                    string newValue = string.Join(' ', values);
-                    newInput.Add(newValue);
-                }
-                else
-                {
-                    long lValue = Convert.ToInt64(x);
-                    lValue *= 2024;
-                    string newValue = lValue.ToString();
-                    _mapping.Add(x, newValue);
-                    newInput.Add(newValue);
-                }
-            }
-        }
-        return string.Join(' ', newInput);
-    }
+    private readonly Dictionary<string, long> _originalStones = [];
     
     public void Solve(string input, int times)
     {
-        string newInput = input;
+        string[] s = input.Split(" ");
+        foreach (string stone in s)
+        {
+            AddOrUpdate(_originalStones, stone, 1);
+        }
+
         for (int i = 0; i < times; i++)
         {
-            newInput = Blink(newInput);
+            var cp = _originalStones.ToDictionary();
+            foreach (var x in cp)
+            {
+                var stone = x.Key;
+                var appearances = x.Value;
+                if (stone == "0")
+                {
+                    AddOrUpdate(_originalStones, "1", appearances);
+                }
+                else if (stone.Length % 2 == 0)
+                {
+                    string[] values = new string[2];
+                    values[0] = Convert.ToInt64(stone[..(stone.Length / 2)]).ToString();
+                    values[1] = Convert.ToInt64(stone[(stone.Length / 2)..]).ToString();
+                    AddOrUpdate(_originalStones, values[0], appearances);
+                    AddOrUpdate(_originalStones, values[1], appearances);
+                }
+                else
+                {
+                    long lValue = Convert.ToInt64(stone);
+                    lValue *= 2024;
+                    string newValue = lValue.ToString();
+                    AddOrUpdate(_originalStones, newValue, appearances);
+                }
+
+                Remove(_originalStones, stone, appearances);
+            }
+        }
+
+        long count = 0;
+        foreach (var x in _originalStones)
+        {
+            count += x.Value;
         }
         
-        Console.WriteLine($"Number of stones: {newInput.Split(' ').Length}");
+        Console.WriteLine($"Number of stones: {count}");
     }
 
 
+    private static void AddOrUpdate(Dictionary<string, long> d, string stone, long times)
+    {
+        if (d.TryGetValue(stone, out long value))
+        {
+            d[stone] = value + times;
+        }
+        else
+        {
+            d.Add(stone, times);
+        }
+    }
+
+    private static void Remove(Dictionary<string, long> d, string stone, long times)
+    {
+        if (!d.TryGetValue(stone, out long value)) return;
+        d[stone] = value - times;
+        if (d[stone] <= 0) d.Remove(stone);
+    }
 }
