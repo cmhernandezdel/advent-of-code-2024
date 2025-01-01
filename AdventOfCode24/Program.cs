@@ -14,5 +14,7 @@
 // d9.Solve("input.txt");
 // Day10 d10 = new Day10();
 // d10.Solve("input.txt");
-Day11 d11 = new Day11();
-d11.Solve(Day11.Input, 75);
+// Day11 d11 = new Day11();
+// d11.Solve(Day11.Input, 75);
+// Day12.Solve("input.txt");
+Day13.Solve("input.txt");
